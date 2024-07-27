@@ -3,6 +3,7 @@
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import csv
+import os
 
 
 def generate_strings(file):
@@ -14,9 +15,10 @@ def generate_strings(file):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    input_file = "../string_data/string_def.csv"
+    cwd = os.getcwd()
+    input_file = cwd + "/string_data/string_def.csv"
 
-    with open(input_file, mode='w', newline='') as file:
+    with open(input_file, mode='r') as file:
         reader = csv.reader(file)
         for row in reader:
             length = int(row['length_string'])
