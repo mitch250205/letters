@@ -1,0 +1,38 @@
+[
+    {
+        "length_string": 1000,
+        "numberSu": 100,
+        "numberKu": 100,
+        "numberYu": 100,
+        "numberSl": 0,
+        "numberKl": 0,
+        "numberYl": 0,
+        "numberDigits": 10,
+        "number_spaces": 0,
+        "number_special_chars": 690
+    },
+    {
+        "length_string": 1000,
+        "numberSu": 100,
+        "numberKu": 98,
+        "numberYu": 100,
+        "numberSl": 0,
+        "numberKl": 2,
+        "numberYl": 0,
+        "numberDigits": 10,
+        "number_spaces": 20,
+        "number_special_chars": 670
+    },
+    {
+        "length_string": 1000,
+        "numberSu": 50,
+        "numberKu": 98,
+        "numberYu": 50,
+        "numberSl": 50,
+        "numberKl": 2,
+        "numberYl": 50,
+        "numberDigits": 10,
+        "number_spaces": 20,
+        "number_special_chars": 670
+    }
+]
