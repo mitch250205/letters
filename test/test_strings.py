@@ -1,10 +1,29 @@
 import pytest
-from create_string.strings import print_hi
+import os
+from create_string.strings import generate_strings
+from create_string.strings import csv_to_dict
+
+MAX_STRING_LEN = 1000
+cwd = os.getcwd()
+input_file = cwd.replace("test","") + "string_data/string_def.csv"
 
 
-@pytest.mark.parametrize('log_file_name,expected', [("output1.log", "kappa 6.2.0 (Release) Mar 15 2021"),
-                                                    ("output2.log", None)])
-def test_string(log_file_name, expected):
+@pytest.mark.parametrize("row", csv_to_dict(input_file))
+def test_string_S(row):
+    row_data = generate_strings(row)
+    thisString = row_data["this_string"]
+    assert thisString.count('S') == row["numberSu"]
 
-    # assert linux_version("OS Version\\s*:\\s*(.*)", log_file_name) == expected
-    assert print_hi("OS Version", log_file_name) == expected
+
+@pytest.mark.parametrize("row", csv_to_dict(input_file))
+def test_string_K(row):
+    row_data = generate_strings(row)
+    thisString = row_data["this_string"]
+    assert thisString.count('K') == row["numberKu"]
+
+
+@pytest.mark.parametrize("row", csv_to_dict(input_file))
+def test_string_Y(row):
+    row_data = generate_strings(row)
+    thisString = row_data["this_string"]
+    assert thisString.count('Y') == row["numberYu"]

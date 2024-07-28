@@ -16,6 +16,58 @@ special_chars_pool = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 digits_pool = string.digits
 
 
+def create_string_definitions(length_string, num_rows):
+    rows = []
+    for _ in range(num_rows):
+        remaining_length = length_string
+
+        number_special_chars = random.randint(0, remaining_length)
+        remaining_length -= number_special_chars
+
+        numberSupper = random.randint(0, remaining_length)
+        remaining_length -= numberSupper
+
+        numberKupper = random.randint(0, remaining_length)
+        remaining_length -= numberKupper
+
+        number_spaces = random.randint(0, remaining_length)
+        remaining_length -= number_spaces
+
+        number_digits = random.randint(0, remaining_length)
+        remaining_length -= number_digits
+
+        numberYupper = random.randint(0, remaining_length)
+        remaining_length -= numberYupper
+
+        numberSlower = random.randint(0, remaining_length)
+        remaining_length -= numberSlower
+
+        numberKlower = random.randint(0, remaining_length)
+        remaining_length -= numberKlower
+
+        numberYlower = random.randint(0, remaining_length)
+        remaining_length -= numberYlower
+
+
+
+        row = [
+            length_string, numberSupper, numberKupper, numberYupper,
+            numberSlower, numberKlower, numberYlower, number_spaces,
+            number_special_chars, number_digits
+        ]
+
+        rows.append(row)
+    return rows
+
+
+def write_to_csv(file_path, data, headers):
+
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(headers)
+        writer.writerows(data)
+
+
 def strip_csv_ext(file):
     base_name = os.path.splitext(file)[0]
     return base_name
