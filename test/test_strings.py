@@ -33,18 +33,18 @@ def test_string_Y(row):
 
 
 @pytest.mark.parametrize("row", known_csv_to_dict(command_line_strings_file))
-def test_command_line_counts(row):
+def test_command_line_countsS(row):
     thisString = row["string"]
     assert thisString.count('S') == row["numberS"]
 
 
 @pytest.mark.parametrize("row", known_csv_to_dict(command_line_strings_file))
-def test_command_line_counts(row):
+def test_command_line_countsK(row):
     thisString = row["string"]
     assert thisString.count('K') == row["numberK"]
 
 
 @pytest.mark.parametrize("row", known_csv_to_dict(command_line_strings_file))
-def test_command_line_counts(row):
+def test_command_line_countsY(row):
     thisString = row["string"]
     assert thisString.count('Y') == row["numberY"]

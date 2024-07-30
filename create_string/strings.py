@@ -1,7 +1,4 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+import argparse
 import csv
 import math
 import os
@@ -9,6 +6,7 @@ import json
 import random
 import string
 import sys
+from datetime import datetime
 
 MAX_SPECIAL_CHARS = 32
 uppercase_pool = string.ascii_uppercase
@@ -16,6 +14,25 @@ lowercase_pool = string.ascii_lowercase
 special_chars_pool = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 digits_pool = string.digits
 
+
+def create_string_test_output_dir():
+    now = datetime.now()
+    formatted_now = now.strftime("%Y-%m-%d_%H-%M")
+    # Get the current working directory
+    cwd = os.getcwd()
+    if cwd.find("create_string") < 0:
+        subdir = f"../string_data/logs/{formatted_now}/"
+    else:
+        subdir = f"../string_data/logs/{formatted_now}/"  # Check if the subdirectory exists
+
+    if not os.path.exists(subdir):
+        # Create the subdirectory if it doesn't exist
+        os.makedirs(subdir)
+        print(f"\nSubdirectory '{subdir}' created.\n")
+    else:
+        subdir = subdir.rstrip('/') + '_' + str(datetime.now().second)
+        os.makedirs(subdir)
+    return subdir
 
 
 def command_line_counts(thisString):
@@ -143,12 +160,22 @@ def csv_to_dict(input_csv):
                 "number_special_chars": int(row['number_special_chars'])
             }
             data.append(row_data)
-    string_json = strip_csv_ext(input_csv) + ".json"
+
+
+    # string_json = strip_csv_ext(input_csv) + ".json"
+
+    # get latest directory for json logs
+    cwd = os.getcwd()
+    """log_directory = "string_data/logs/"
+    subdirs = [os.path.join(log_directory, d) for d in os.listdir(log_directory) if os.path.isdir(os.path.join(log_directory, d))]
+    latest_subdir = max(subdirs, key=os.path.getctime)
+
+    string_json = cwd + "/" + latest_subdir + "/string_def.json"
     # Save the data to a JSON file
-    with open(string_json, mode='w') as outfile:
+    with open(string_json, mode='a') as outfile:
         json.dump(data, outfile, indent=4)
 
-    print(f"Data has been read from {input_csv} and written to {string_json}")
+    print(f"Data has been read from {input_csv} and written to {string_json}") """
     return data
 
 
@@ -237,90 +264,122 @@ def generate_strings(row_data):
     return row_data
 
 
+def handle_known_file_tests():
+    cwd = os.getcwd()
+    if cwd.find("create_string") > 0:
+        dir = os.path.dirname(cwd)
+        cwd = dir
+
+    known_file = cwd + "/string_data/known_strings.csv"
+    with open(known_file, mode='r') as infile:
+        reader = csv.DictReader(infile)
+        data = list(reader)
+
+        for row in data:
+            assert row['string'].count('S') == int(row['numberS'])
+            assert row['string'].count('K') == int(row['numberK'])
+            assert row['string'].count('Y') == int(row['numberY'])
+            print(f"string {row['string']}  PASS")
+
+
+def handle_generated_file_tests():
+    cwd = os.getcwd()
+
+    if cwd.find("create_string") > 0:
+        dir = os.path.dirname(cwd)
+        cwd = dir
+
+    input_file = cwd + "/string_data/string_def.csv"
+
+    print(input_file)
+
+    string_data = csv_to_dict(input_file)
+    row_count = 0
+    for row in string_data:
+        my_dict = generate_strings(row)
+        stringUnderTest = my_dict['this_string']
+        assert stringUnderTest.count('S') == my_dict['numberSu']
+        assert stringUnderTest.count('K') == my_dict['numberKu']
+        assert stringUnderTest.count('Y') == my_dict['numberYu']
+        assert len(stringUnderTest) == int(my_dict['length_string'])
+        print(f"row {row_count + 2}  PASS")
+        row_count += 1
+
+
 if __name__ == '__main__':
-    """print("Usage: python strings.py will count the number of 'S', 'K' or 'Y' characters in any string.\n"
-          "In order to count the number of S K OR Y in a list of known strings these can be added to a\n"
-          "file and passed as an argument.\n"
-          "We can also generate a set of pseudo random strings using the csv file in /create_string/string_def.csv\n")
-    print("Usage: To Count 'S','K' and 'Y' characters in a command line String:")
-    print("Usage: python strings.py string 'qgrr32775833SSSSKKKY' ")
-    print("")
-    print("Usage: To Count 'S','K' and 'Y' characters in known Strings in a file:")
-    print("Usage: python strings.py file /path/strings.csv ")
-    print("")
-    print("Usage: To Count 'S','K' and 'Y' characters in psuedo generated Strings in a file:")
-    print("Usage: python strings.py gen string_def.csv ")
+    parser = argparse.ArgumentParser(description="Count occurrences of S, K, and Y in a string.")
+    subparsers = parser.add_subparsers(dest='command')
 
-    print("Usage: Where strings.csv contains a list of strings and expected number of S, K and Y's")
-    print("Usage: like 'qgrr32775833SS22@@££SSKKKY',4,3,1 ")
-    print("Usage: Where 'string_source' = file or string name "
-          "like strings.csv or actual string like 'qgrr32775833SSSSKKKY' ") """
-    expected_num_args = 2
+    # Subparser for the 'file' command
+    file_parser = subparsers.add_parser('file', help="Test all strings stored in the known_strings.csv file.")
 
-    if len(sys.argv) != expected_num_args + 1:
-        print(f"Error: This script requires exactly {expected_num_args} arguments.")
-        print("Usage: python strings.py file /path/strings.txt or ")
+    # Subparser for the 'string' command
+    string_parser = subparsers.add_parser('string', help="Count S, K, and Y in a provided string.")
+    string_parser.add_argument('input_string', type=str, help="String to analyze")
+
+    # Subparser for the 'gen' command
+    gen_parser = subparsers.add_parser('gen', help="Test all pre-generated strings stored in the string_def.csv file.")
+
+    args = parser.parse_args()
+
+    if args.command == 'file':
+        handle_known_file_tests()
+    elif args.command == 'string':
+        input_string = args.input_string.encode('utf-8', errors='replace').decode('utf-8')
+        string_results = command_line_counts(input_string)
+        add_string_to_known_file(string_results)
+        # write_to_csv('known_strings.csv', results)
+    elif args.command == 'gen':
+        handle_generated_file_tests()
+    else:
+        parser.print_help()
+
+
+
+    """if len(sys.argv) == 1:
+        print("")
+        print("Usage: no arguments provided")
+        print("Usage: to count S, K and Y in a string, result will go into the known_strings.csv...")
         print("Usage: python strings.py string 'qgrr32775833SSSSKKKY' ")
-        print("Where 'string_source' = file or string name "
-              "like strings.txt or actual string like 'qgrr32775833SSSSKKKY' ")
-        sys.exit(1)
-
-    if sys.argv[1] != "file" and sys.argv[1] != "string" and sys.argv[1] != "gen":
-        print("Usage: first argument should be 'file' or 'string' or 'gen' ")
-        sys.exit(1)
+        print("Usage: to test all the string stored in the known_strings.csv file...")
+        print("Usage: python strings.py file")
+        print("Usage: to test all the pre-generated strings stored in the string_def.csv file...")
+        print("Usage: python strings.py gen")
+        print("")
+        exit(1)
 
     if sys.argv[1] == "file":
-        cwd = os.getcwd()
-        command_line_strings_file = cwd.replace("test", "") + "string_data/known_strings.csv"
 
-        cwd = os.getcwd()
-        if cwd.find("create_string") > 0:
-            dir = os.path.dirname(cwd)
-            cwd = dir
+        if len(sys.argv) != 2:
+            print("Usage: if first arg = 'file' only one arg is required ")
+            sys.exit(1)
 
-        known_file = cwd + "/string_data/known_strings.csv"
-        with open(known_file, mode='r') as infile:
-            reader = csv.DictReader(infile)
-            data = list(reader)
+        handle_known_file_tests()
 
-            for row in data:
+    elif sys.argv[1] == "string":
 
-                assert row['string'].count('S') == int(row['numberS'])
-                assert row['string'].count('K') == int(row['numberK'])
-                assert row['string'].count('Y') == int(row['numberY'])
-                print(f"string {row['string']}  PASS")
-
-    if sys.argv[1] == "string":
+        if len(sys.argv) != 3:
+            print("Usage: if first arg = 'string' a string to test is required like 'SKY!@£$' ")
+            sys.exit(1)
+        #  to handle the ' in the string
         userString = sys.argv[2].encode('utf-8', errors='replace').decode('utf-8')
         string_results = command_line_counts(userString)
         add_string_to_known_file(string_results)
 
-    if sys.argv[1] == "gen":
+    elif sys.argv[1] == "gen":
 
-        cwd = os.getcwd()
+        if len(sys.argv) != 2:
+            print("Usage: if first arg = 'gen' only one arg is required ")
+            sys.exit(1)
+        handle_generated_file_tests()
 
-        if cwd.find("create_string") > 0:
-            dir = os.path.dirname(cwd)
-            cwd = dir
-
-        print(f"dir {dir}")
-
-        input_file = cwd + "/string_data/string_def.csv"
-
-        print(input_file)
-
-
-
-        string_data = csv_to_dict(input_file)
-        row_count = 0
-        for row in string_data:
-            my_dict = generate_strings(row)
-            stringUnderTest = my_dict['this_string']
-            assert stringUnderTest.count('S') == my_dict['numberSu']
-            assert stringUnderTest.count('K') == my_dict['numberKu']
-            assert stringUnderTest.count('Y') == my_dict['numberYu']
-            assert len(stringUnderTest) == int(my_dict['length_string'])
-            print(f"row {row_count + 2}  PASS")
-            row_count += 1
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    else:
+        print("")
+        print("Usage: incorrect arguments provided")
+        print("Usage: to count S, K and Y in a string, result will go into the known_strings.csv...")
+        print("Usage: python strings.py string 'qgrr32775833SSSSKKKY' ")
+        print("Usage: to test all the string stored in the known_strings.csv file...")
+        print("Usage: python strings.py file")
+        print("Usage: to test all the pre-generated strings stored in the string_def.csv file...")
+        print("Usage: python strings.py gen")
+        print("") """
